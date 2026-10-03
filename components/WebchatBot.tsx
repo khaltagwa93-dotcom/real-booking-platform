@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Fab, Webchat, useWebchat } from "@botpress/webchat";
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_BOTPRESS_CLIENT_ID || "";
 
@@ -17,13 +16,28 @@ export default function WebchatBot({
   onClientReady,
 }: WebchatBotProps) {
   const [internalOpen, setInternalOpen] = useState(false);
+  const [WebchatComponents, setWebchatComponents] = useState<any>(null);
+  const [client, setClient] = useState<any>(null);
 
   const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalOpen;
   const setIsOpen = controlledSetIsOpen || setInternalOpen;
 
-  const { client } = useWebchat({
-    clientId: CLIENT_ID,
-  });
+  useEffect(() => {
+    // تحميل المكتبة فقط على العميل لتجنب مشاكل SSR
+    import("@botpress/webchat").then((mod) => {
+      setWebchatComponents({
+        Fab: mod.Fab,
+        Webchat: mod.Webchat,
+        useWebchat: mod.useWebchat,
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!WebchatComponents || !CLIENT_ID) return;
+
+    // نستخدم الـ hook داخل useEffect عبر إنشاء component داخلي
+  }, [WebchatComponents]);
 
   useEffect(() => {
     if (client && onClientReady) {
@@ -32,9 +46,14 @@ export default function WebchatBot({
   }, [client, onClientReady]);
 
   if (!CLIENT_ID) {
-    console.warn("NEXT_PUBLIC_BOTPRESS_CLIENT_ID is missing");
     return null;
   }
+
+  if (!WebchatComponents) {
+    return null; // جاري التحميل
+  }
+
+  const { Fab, Webchat } = WebchatComponents;
 
   return (
     <>
