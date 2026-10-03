@@ -151,47 +151,54 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredHotels.map((hotel) => (
-            <Link
-              key={hotel.id}
-              href={`/hotels/${hotel.id}`}
-              className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
-            >
-              <div className="relative h-48 overflow-hidden">
-                <Image
-                  src={hotel.image}
-                  alt={hotel.name}
-                  fill
-                  className="object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-sm font-bold text-primary-700">
-                  {hotel.stars} ★
-                </div>
-              </div>
-              <div className="p-4">
-                <div className="flex items-center gap-1 text-sm text-gray-500 mb-1">
-                  <MapPin className="w-3.5 h-3.5" />
-                  {hotel.city}، {hotel.country}
-                </div>
-                <h3 className="font-bold text-lg text-gray-900 group-hover:text-primary-600 transition">
-                  {hotel.name}
-                </h3>
-                <div className="flex items-center gap-1 mt-1">
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <span className="font-medium text-sm">{hotel.rating}</span>
-                  <span className="text-gray-400 text-sm">({hotel.reviews} تقييم)</span>
-                </div>
-                <div className="mt-3 flex items-end justify-between">
-                  <div>
-                    <span className="text-2xl font-bold text-primary-600">{hotel.price}</span>
-                    <span className="text-gray-500 text-sm"> ر.س / ليلة</span>
+        {featuredHotels.length === 0 ? (
+          <div className="bg-white rounded-2xl p-12 text-center border border-dashed border-gray-200">
+            <p className="text-gray-500 text-lg mb-2">لا توجد فنادق متاحة حالياً</p>
+            <p className="text-gray-400 text-sm">سيتم إضافة الفنادق قريباً أو ربط المنصة بقاعدة بيانات حقيقية</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featuredHotels.map((hotel) => (
+              <Link
+                key={hotel.id}
+                href={`/hotels/${hotel.id}`}
+                className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
+              >
+                <div className="relative h-48 overflow-hidden">
+                  <Image
+                    src={hotel.image}
+                    alt={hotel.name}
+                    fill
+                    className="object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-sm font-bold text-primary-700">
+                    {hotel.stars} ★
                   </div>
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+                <div className="p-4">
+                  <div className="flex items-center gap-1 text-sm text-gray-500 mb-1">
+                    <MapPin className="w-3.5 h-3.5" />
+                    {hotel.city}، {hotel.country}
+                  </div>
+                  <h3 className="font-bold text-lg text-gray-900 group-hover:text-primary-600 transition">
+                    {hotel.name}
+                  </h3>
+                  <div className="flex items-center gap-1 mt-1">
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    <span className="font-medium text-sm">{hotel.rating}</span>
+                    <span className="text-gray-400 text-sm">({hotel.reviews} تقييم)</span>
+                  </div>
+                  <div className="mt-3 flex items-end justify-between">
+                    <div>
+                      <span className="text-2xl font-bold text-primary-600">{hotel.price}</span>
+                      <span className="text-gray-500 text-sm"> ر.س / ليلة</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Why Us */}
