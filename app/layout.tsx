@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Link from "next/link";
 import { Hotel, CalendarCheck, Search } from "lucide-react";
-import ChatBot from "@/components/ChatBot";
+import WebchatBot from "@/components/WebchatBot";
 
 export const metadata: Metadata = {
   title: "حجزني | منصة الحجوزات الفاخرة",
@@ -105,8 +105,8 @@ export default function RootLayout({
           </div>
         </footer>
 
-        {/* AI Chat Bot */}
-        <ChatBot />
+        {/* Botpress Webchat */}
+        <WebchatBot />
       </body>
     </html>
   );
