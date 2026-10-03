@@ -1,8 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_BOTPRESS_CLIENT_ID || "";
+
+declare global {
+  interface Window {
+    botpressWebChat?: any;
+    botpress?: any;
+  }
+}
 
 interface WebchatBotProps {
   isOpen?: boolean;
@@ -15,75 +22,58 @@ export default function WebchatBot({
   setIsOpen: controlledSetIsOpen,
   onClientReady,
 }: WebchatBotProps) {
-  const [internalOpen, setInternalOpen] = useState(false);
-  const [WebchatComponents, setWebchatComponents] = useState<any>(null);
-  const [client, setClient] = useState<any>(null);
-
-  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalOpen;
-  const setIsOpen = controlledSetIsOpen || setInternalOpen;
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // تحميل المكتبة فقط على العميل لتجنب مشاكل SSR
-    import("@botpress/webchat").then((mod) => {
-      setWebchatComponents({
-        Fab: mod.Fab,
-        Webchat: mod.Webchat,
-        useWebchat: mod.useWebchat,
-      });
-    });
-  }, []);
+    if (!CLIENT_ID) return;
 
+    // تحميل سكريبت Botpress بالطريقة الرسمية (أكثر استقراراً مع Next.js)
+    const script = document.createElement("script");
+    script.src = "https://cdn.botpress.cloud/webchat/v2.2/inject.js";
+    script.async = true;
+    script.onload = () => {
+      // تهيئة البوت
+      const initScript = document.createElement("script");
+      initScript.src = `https://files.bpcontent.cloud/${CLIENT_ID}/webchat/config.js`;
+      initScript.async = true;
+      document.body.appendChild(initScript);
+
+      // انتظار حتى يصبح البوت جاهزاً
+      const check = setInterval(() => {
+        if (window.botpressWebChat || window.botpress) {
+          clearInterval(check);
+          setReady(true);
+          if (onClientReady) {
+            onClientReady(window.botpressWebChat || window.botpress);
+          }
+        }
+      }, 300);
+
+      setTimeout(() => clearInterval(check), 10000);
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      // تنظيف عند unmount
+      script.remove();
+    };
+  }, [onClientReady]);
+
+  // التحكم في الفتح/الإغلاق إذا تم تمرير isOpen
   useEffect(() => {
-    if (!WebchatComponents || !CLIENT_ID) return;
+    if (!ready) return;
+    const bp = window.botpressWebChat || window.botpress;
+    if (!bp) return;
 
-    // نستخدم الـ hook داخل useEffect عبر إنشاء component داخلي
-  }, [WebchatComponents]);
-
-  useEffect(() => {
-    if (client && onClientReady) {
-      onClientReady(client);
+    if (controlledIsOpen === true) {
+      bp.open?.();
+    } else if (controlledIsOpen === false) {
+      bp.close?.();
     }
-  }, [client, onClientReady]);
+  }, [controlledIsOpen, ready]);
 
-  if (!CLIENT_ID) {
-    return null;
-  }
+  if (!CLIENT_ID) return null;
 
-  if (!WebchatComponents) {
-    return null; // جاري التحميل
-  }
-
-  const { Fab, Webchat } = WebchatComponents;
-
-  return (
-    <>
-      <Webchat
-        clientId={CLIENT_ID}
-        style={{
-          width: "400px",
-          height: "600px",
-          position: "fixed",
-          bottom: "90px",
-          right: "20px",
-          borderRadius: "10px",
-          boxShadow: "0 8px 30px rgba(0,0,0,0.18)",
-          zIndex: 9998,
-          display: isOpen ? "flex" : "none",
-          overflow: "hidden",
-        }}
-      />
-
-      <Fab
-        onClick={() => setIsOpen(!isOpen)}
-        style={{
-          position: "fixed",
-          bottom: "20px",
-          right: "20px",
-          width: "64px",
-          height: "64px",
-          zIndex: 9999,
-        }}
-      />
-    </>
-  );
+  // البوت يظهر تلقائياً عبر السكريبت (الزر العائم مدمج)
+  return null;
 }
