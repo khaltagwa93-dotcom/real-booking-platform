@@ -73,7 +73,6 @@ export default function HotelDetailPage() {
       createdAt: new Date().toISOString(),
     };
 
-    // Save to localStorage
     const existing = JSON.parse(localStorage.getItem("bookings") || "[]");
     existing.push(booking);
     localStorage.setItem("bookings", JSON.stringify(existing));
@@ -101,7 +100,6 @@ export default function HotelDetailPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
         <Link href="/" className="hover:text-primary-600">الرئيسية</Link>
         <span>/</span>
@@ -110,7 +108,6 @@ export default function HotelDetailPage() {
         <span className="text-gray-900">{hotel.name}</span>
       </div>
 
-      {/* Images */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-8 rounded-2xl overflow-hidden">
         <div className="md:col-span-2 relative h-72 md:h-96">
           <Image
@@ -137,7 +134,6 @@ export default function HotelDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Details */}
         <div className="lg:col-span-2">
           <div className="flex items-start justify-between mb-4">
             <div>
@@ -162,7 +158,6 @@ export default function HotelDetailPage() {
             {hotel.description}
           </p>
 
-          {/* Amenities */}
           <div className="mb-8">
             <h2 className="text-xl font-bold mb-4">المرافق والخدمات</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -182,7 +177,6 @@ export default function HotelDetailPage() {
           </div>
         </div>
 
-        {/* Booking Card */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sticky top-24">
             <div className="mb-4">
@@ -333,7 +327,7 @@ export default function HotelDetailPage() {
             )}
 
             <p className="text-center text-xs text-gray-400 mt-4">
-              لن يتم خصم أي مبلغ الآن. يمكنك الإلغاء مجاناً.
+              الحجز يخضع لسياسة الإلغاء الخاصة بالفندق.
             </p>
           </div>
         </div>

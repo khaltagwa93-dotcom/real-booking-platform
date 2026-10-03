@@ -64,8 +64,8 @@ function BookingsContent() {
         <div className="mb-6 bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-2xl flex items-center gap-3 animate-pulse">
           <CheckCircle className="w-6 h-6 text-green-600" />
           <div>
-            <p className="font-bold">تم تأكيد حجزك بنجاح! 🎉</p>
-            <p className="text-sm">ستصلك رسالة تأكيد على بريدك الإلكتروني قريباً.</p>
+            <p className="font-bold">تم تسجيل حجزك بنجاح</p>
+            <p className="text-sm">يمكنك مراجعة تفاصيل الحجز أدناه.</p>
           </div>
         </div>
       )}
