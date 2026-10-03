@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { MessageCircle, X } from "lucide-react";
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_BOTPRESS_CLIENT_ID || "";
 
@@ -22,27 +23,29 @@ export default function WebchatBot({
   setIsOpen: controlledSetIsOpen,
   onClientReady,
 }: WebchatBotProps) {
-  const [ready, setReady] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const [bpReady, setBpReady] = useState(false);
 
+  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalOpen;
+  const setIsOpen = controlledSetIsOpen || setInternalOpen;
+
+  // تحميل سكريبت Botpress إذا وُجد Client ID
   useEffect(() => {
     if (!CLIENT_ID) return;
 
-    // تحميل سكريبت Botpress بالطريقة الرسمية (أكثر استقراراً مع Next.js)
     const script = document.createElement("script");
     script.src = "https://cdn.botpress.cloud/webchat/v2.2/inject.js";
     script.async = true;
     script.onload = () => {
-      // تهيئة البوت
       const initScript = document.createElement("script");
       initScript.src = `https://files.bpcontent.cloud/${CLIENT_ID}/webchat/config.js`;
       initScript.async = true;
       document.body.appendChild(initScript);
 
-      // انتظار حتى يصبح البوت جاهزاً
       const check = setInterval(() => {
         if (window.botpressWebChat || window.botpress) {
           clearInterval(check);
-          setReady(true);
+          setBpReady(true);
           if (onClientReady) {
             onClientReady(window.botpressWebChat || window.botpress);
           }
@@ -54,26 +57,69 @@ export default function WebchatBot({
     document.body.appendChild(script);
 
     return () => {
-      // تنظيف عند unmount
       script.remove();
     };
   }, [onClientReady]);
 
-  // التحكم في الفتح/الإغلاق إذا تم تمرير isOpen
+  // مزامنة حالة الفتح مع Botpress
   useEffect(() => {
-    if (!ready) return;
+    if (!bpReady) return;
     const bp = window.botpressWebChat || window.botpress;
     if (!bp) return;
 
-    if (controlledIsOpen === true) {
+    if (isOpen) {
       bp.open?.();
-    } else if (controlledIsOpen === false) {
+    } else {
       bp.close?.();
     }
-  }, [controlledIsOpen, ready]);
+  }, [isOpen, bpReady]);
 
-  if (!CLIENT_ID) return null;
+  const handleToggle = () => {
+    const next = !isOpen;
+    setIsOpen(next);
 
-  // البوت يظهر تلقائياً عبر السكريبت (الزر العائم مدمج)
-  return null;
+    const bp = window.botpressWebChat || window.botpress;
+    if (bp) {
+      if (next) bp.open?.();
+      else bp.close?.();
+    }
+  };
+
+  return (
+    <>
+      {/* الزر العائم يظهر دائماً في كل الصفحات */}
+      <button
+        onClick={handleToggle}
+        className={`fixed bottom-6 left-6 z-[9999] w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
+          isOpen
+            ? "bg-gray-700 hover:bg-gray-800"
+            : "bg-primary-600 hover:bg-primary-700"
+        }`}
+        aria-label="المساعد الذكي"
+        title="المساعد الذكي"
+      >
+        {isOpen ? (
+          <X className="w-6 h-6 text-white" />
+        ) : (
+          <MessageCircle className="w-6 h-6 text-white" />
+        )}
+      </button>
+
+      {/* رسالة تنبيه إذا لم يُضف Client ID */}
+      {isOpen && !CLIENT_ID && (
+        <div className="fixed bottom-24 left-6 z-[9998] w-[320px] bg-white rounded-2xl shadow-2xl border border-gray-200 p-5">
+          <h3 className="font-bold text-gray-900 mb-2">المساعد الذكي</h3>
+          <p className="text-sm text-gray-600 leading-relaxed">
+            يرجى إضافة متغير البيئة <code className="bg-gray-100 px-1 rounded text-xs">NEXT_PUBLIC_BOTPRESS_CLIENT_ID</code> في Vercel لتفعيل بوت Botpress.
+          </p>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="mt-4 w-full bg-primary-600 text-white py-2 rounded-xl text-sm font-medium hover:bg-primary-700"
+          >
+            حسناً
+          </button>
+        </div>
+      )}
+    </>
+  );
 }
