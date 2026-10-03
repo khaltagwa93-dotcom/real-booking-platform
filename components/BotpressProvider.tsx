@@ -14,7 +14,12 @@ const BotpressContext = createContext<BotpressContextType | null>(null);
 export function useBotpress() {
   const ctx = useContext(BotpressContext);
   if (!ctx) {
-    throw new Error("useBotpress must be used within BotpressProvider");
+    // إرجاع قيم افتراضية لتجنب كسر الصفحة إذا لم يكن الـ Provider موجوداً
+    return {
+      handleBookNow: () => console.warn("Botpress not ready"),
+      isOpen: false,
+      setIsOpen: () => {},
+    };
   }
   return ctx;
 }
@@ -24,18 +29,38 @@ export default function BotpressProvider({ children }: { children: ReactNode }) 
   const clientRef = useRef<any>(null);
 
   const handleBookNow = (venueId: string, venueName: string) => {
-    if (clientRef.current) {
-      clientRef.current.sendEvent({
-        type: "custom.trigger",
-        payload: {
-          action: "start_booking",
-          venueId,
-          venueName,
-        },
-      });
+    const bp = clientRef.current || (window as any).botpressWebChat || (window as any).botpress;
+
+    if (bp) {
+      // إرسال الحدث المخصص
+      if (typeof bp.sendEvent === "function") {
+        bp.sendEvent({
+          type: "custom.trigger",
+          payload: {
+            action: "start_booking",
+            venueId,
+            venueName,
+          },
+        });
+      } else if (typeof bp.sendPayload === "function") {
+        bp.sendPayload({
+          type: "custom.trigger",
+          payload: {
+            action: "start_booking",
+            venueId,
+            venueName,
+          },
+        });
+      }
+
+      // فتح الدردشة
+      if (typeof bp.open === "function") {
+        bp.open();
+      }
     } else {
-      console.warn("Botpress client not ready yet");
+      console.warn("Botpress client not ready yet. تأكد من إضافة NEXT_PUBLIC_BOTPRESS_CLIENT_ID");
     }
+
     setIsOpen(true);
   };
 
