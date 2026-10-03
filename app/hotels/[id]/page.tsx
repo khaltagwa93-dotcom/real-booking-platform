@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Star, Wifi, Car, Waves, Utensils, Dumbbell, Spa, Check, ArrowRight } from "lucide-react";
+import { MapPin, Star, Wifi, Car, Waves, Utensils, Dumbbell, Sparkles, Check, ArrowRight } from "lucide-react";
 import { getHotelById } from "@/data/hotels";
 
 export default function HotelDetailPage() {
@@ -96,7 +96,7 @@ export default function HotelDetailPage() {
     "مطاعم عالمية": Utensils,
     "مطاعم آسيوية": Utensils,
     "صالة رياضية": Dumbbell,
-    "سبا": Spa,
+    "سبا": Sparkles,
   };
 
   return (
