@@ -4,13 +4,15 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Star, Wifi, Car, Waves, Utensils, Dumbbell, Sparkles, Check, ArrowRight } from "lucide-react";
+import { MapPin, Star, Wifi, Car, Waves, Utensils, Dumbbell, Sparkles, Check, ArrowRight, MessageCircle } from "lucide-react";
 import { getHotelById } from "@/data/hotels";
+import { useBotpress } from "@/components/BotpressProvider";
 
 export default function HotelDetailPage() {
   const params = useParams();
   const router = useRouter();
   const hotel = getHotelById(params.id as string);
+  const { handleBookNow } = useBotpress();
   
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
@@ -258,6 +260,16 @@ export default function HotelDetailPage() {
                   className="w-full bg-primary-600 text-white py-3.5 rounded-xl font-bold text-lg hover:bg-primary-700 transition"
                 >
                   احجز الآن
+                </button>
+
+                {/* زر الحجز عبر المساعد الذكي (Botpress) */}
+                <button
+                  type="button"
+                  onClick={() => handleBookNow(hotel.id, hotel.name)}
+                  className="w-full bg-white border-2 border-primary-600 text-primary-600 py-3 rounded-xl font-bold text-base hover:bg-primary-50 transition flex items-center justify-center gap-2"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  احجز عبر المساعد الذكي
                 </button>
               </div>
             ) : (
